@@ -4,7 +4,11 @@ using namespace std;
 
 int main (void)
 {
-    cout<<"Hello world";
+
+    int i; 
+     cout<<"Hello world";
+     cout<<"Introduzca un numero: ";
+    cin>>i;
 
     return 0;
 }
