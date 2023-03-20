@@ -1,17 +1,18 @@
 # include <iostream>
 #include <fstream>
-
 using namespace std;
+void conversionmasas ( masas, masasc );
 
 int main (void)
 {
 
-
+   double masasc[9],masas[9];
+   cout<<"HOLA";
 
 
 }
 
-void conversionmasas ( masas[], masasc[] )
+void conversionmasas ( masas[9], masasc[9] )
 {
    ifstream fich;
 
