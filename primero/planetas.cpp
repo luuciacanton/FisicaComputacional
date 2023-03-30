@@ -12,7 +12,7 @@ void aceleracion  (double a[], double masas[], double pos1[], double pos2[]);
 void posicionesyw (double r[], double w[],double v[], double a[]);
 void velocidades (double w[],double a[], double v[]);
 
-int main (void)
+int main ( )
 {
    
    int i;
@@ -23,7 +23,7 @@ int main (void)
    double ax[9],ay[9];
    double t, tfinal, iter;
    double wx[9], wy[9];
-   ofstream fichpos, fichvel;
+   ofstream fichpos, fichvel, fichacel;
 
 pasaravectores ( masas, "masasescaladas.txt");
 pasaravectores ( rx, "distanciasolyaescala.txt");
@@ -43,6 +43,12 @@ for(i=0;i<9;i++)
 
 fichpos.open("planets_data.dat");
 fichvel.open("velocidades.txt");
+fichacel.open("aceleracion.txt");
+
+for(i=0;i<9;i++)
+{
+   vy[i]=vy[i]/sqrt(G*MasaSol/c);
+}
 
 aceleracion  ( ax,  masas, rx, ry);
 aceleracion  ( ay,  masas, ry, rx);
@@ -51,32 +57,30 @@ aceleracion  ( ay,  masas, ry, rx);
 cout<<"Introduzca el tiempo durante el cual se va a ejecutar el programa:";
 cin>>tfinal;
 //numero iteraciones
-iter= (int) tfinal/h;
+iter= tfinal/h;
 
 
 for (t=0;t<iter;t++)
 {
-   fichpos<<rx[0]<<" "<<ry[0]<<endl;
-   fichpos<<rx[1]<<" "<<ry[1]<<endl;
-   fichpos<<rx[2]<<" "<<ry[2]<<endl;
-   fichpos<<rx[3]<<" "<<ry[3]<<endl;
-   fichpos<<rx[4]<<" "<<ry[4]<<endl;
-   fichpos<<rx[5]<<" "<<ry[5]<<endl;
-   fichpos<<rx[6]<<" "<<ry[6]<<endl;
-   fichpos<<rx[7]<<" "<<ry[7]<<endl;
-   fichpos<<rx[8]<<" "<<ry[8]<<endl;
-   cout<<endl;
- 
+
+   for(i=0;i<9;i++)
+   {
+        fichpos<<rx[i]<<", "<<ry[i]<<endl;
+   }
+  
+   fichpos<<endl;
 
    posicionesyw ( rx, wx, vx,  ax);
    posicionesyw ( ry, wy, vy,  ay);
 
+/*
    for(i=0;i<9;i++)
    {
       ax[i]=0.0;
-       ay[i]=0.0;
+      ay[i]=0.0;
 
    }
+   */
 
    aceleracion  ( ax,  masas, rx, ry);
    aceleracion  ( ay,  masas, ry, rx);
@@ -84,12 +88,13 @@ for (t=0;t<iter;t++)
    velocidades ( wx,ax, vx);
    velocidades ( wy,ay, vy);
 
- t =t+h;
+   t =t+h;
 
 }
 
 fichpos.close();
 fichvel.close();
+fichacel.close();
 
   return 0 ;
  
@@ -124,13 +129,13 @@ void aceleracion  (double a[], double masas[], double pos1[], double pos2[])
    for(i=0;i<9;i++)
    {
       for(j=0;j<9;j++)
-         if(j!=i) 
+         if(i!=j) 
          {
             norma=sqrt((pos1[i]-pos1[j])*(pos1[i]-pos1[j])+(pos2[i]-pos2[j])*(pos2[i]-pos2[j]));
-            suma+=masas[j]*((pos1[i]-pos1[j])/pow(norma,3));
+            a[i]-=masas[j]*((pos1[i]-pos1[j])/(norma*norma*norma));
          }
          
-      a[i]=-suma;   
+      //a[i]=suma;   
    }
 
    return;
@@ -143,7 +148,7 @@ void posicionesyw (double r[], double w[],double v[], double a[])
 
     for (i=0;i<9;i++)
     {
-      r[i]=r[i]+h*v[i]+h*h*a[i]/2.0;
+      r[i]=r[i]+h*v[i]+h*h*a[i]/2.0; 
       w[i]=v[i]+h*a[i]/2.0;
     }
 
