@@ -23,8 +23,9 @@ int main ( )
    double ax[9],ay[9];
    double t, tfinal, iter;
    double wx[9], wy[9];
-   ofstream fichpos, fichvel, fichacel;
+   ofstream fichpos, fichenerg, fichper;
 
+//pasamos los datos iniciales a vectores para poder trabajar con ellos
 pasaravectores ( masas, "masasescaladas.txt");
 pasaravectores ( rx, "distanciasolyaescala.txt");
 pasaravectores ( vy, "velorb.txt");
@@ -42,14 +43,16 @@ for(i=0;i<9;i++)
 //algoritmo verlet
 
 fichpos.open("planets_data.dat");
-fichvel.open("velocidades.txt");
-fichacel.open("aceleracion.txt");
+fichenerg.open("energia.txt");
+fichper.open("periodo.txt");
 
+//reescalar velocidades
 for(i=0;i<9;i++)
 {
    vy[i]=vy[i]/sqrt(G*MasaSol/c);
 }
 
+//aceleracion inicial
 aceleracion  ( ax,  masas, rx, ry);
 aceleracion  ( ay,  masas, ry, rx);
 
@@ -57,7 +60,7 @@ aceleracion  ( ay,  masas, ry, rx);
 cout<<"Introduzca el tiempo durante el cual se va a ejecutar el programa:";
 cin>>tfinal;
 //numero iteraciones
-iter= tfinal/h;
+iter= (int) tfinal/h;
 
 
 for (t=0;t<iter;t++)
@@ -73,14 +76,14 @@ for (t=0;t<iter;t++)
    posicionesyw ( rx, wx, vx,  ax);
    posicionesyw ( ry, wy, vy,  ay);
 
-/*
+
    for(i=0;i<9;i++)
    {
       ax[i]=0.0;
       ay[i]=0.0;
 
    }
-   */
+   
 
    aceleracion  ( ax,  masas, rx, ry);
    aceleracion  ( ay,  masas, ry, rx);
@@ -93,8 +96,8 @@ for (t=0;t<iter;t++)
 }
 
 fichpos.close();
-fichvel.close();
-fichacel.close();
+fichenerg.close();
+fichper.close();
 
   return 0 ;
  
@@ -165,5 +168,34 @@ void velocidades (double w[],double a[], double v[])
    }
 
    return ;
+}
+
+//calculamos la energia mecanica del sistema con la energia cinetica y potencial gravitatoria
+double energia (double pos1[], double pos2[], double vx[], double vy[], double masas[])
+{
+  int i,j;
+  double E;
+  double norma;
+  //E es una sumatoria asique la iniciamos a 0
+  E=0;
+
+  for (i=0;i<9;i++)
+  {
+      //cinetica
+      E+= 0.5*masas[i]*(vx[i]*vx[i]+vy[i]*vy[i]);
+      //potencial gravitatorio
+      for (j=0;j<9;j++)
+      {
+         if(i!=j)
+         {
+            norma=sqrt((pos1[i]-pos1[j])*(pos1[i]-pos1[j])+(pos2[i]-pos2[j])*(pos2[i]-pos2[j]));
+            E-=masas[i]*masas[j]/norma;
+         }
+      }
+
+  }
+
+  return E;
+
 }
 
