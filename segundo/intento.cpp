@@ -5,9 +5,8 @@
 
 
 using namespace std;
-double energia(s[][100]);
-double energia (s[100][100]);
-double minimo (energia(s[100][100]),T);
+double energia(int s[][100]);
+double minimo (double energia, double T);
 
 int main (void)
 {
@@ -36,7 +35,7 @@ int main (void)
   //generar un numero aleatorio entre 0 y 1
   e=(double) rand()/RAND_MAX;
 
-  if(e<minimo(energia(s[n][m]),T))
+  if(e<minimo(energia(s),T))
       s[n][m]=-s[n][m];
 
    return 0;
@@ -62,7 +61,7 @@ double energia (s[100][100])
 
 };
 
-double minimo (energia(s[100][100]),T)
+double minimo (energia(s),T)
 {
 
    double cosa;
