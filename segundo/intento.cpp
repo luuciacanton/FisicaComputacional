@@ -2,10 +2,10 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
-
+#define N 16
 
 using namespace std;
-double energia(int s[][100]);
+double energia(int s[][N]);
 double minimo (double energia, double T);
 
 int main (void)
@@ -13,7 +13,7 @@ int main (void)
     int i,j;
     double T;
     int N,n,m;
-    int s[100][100];
+    int s[N][N];
     double e;
 
     srand(time(NULL));
