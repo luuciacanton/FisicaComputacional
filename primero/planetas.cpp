@@ -1,36 +1,45 @@
 # include <iostream>
 #include<fstream>
 #include <cmath>
-using namespace std;
-#define MasaSol 1.989e30
-#define G 6.67e-20
-#define c 1.496e8
+#define MasaSol 1.99e30 //kg
+#define G 6.67e-20 //km^3/kgs
+#define c 1.496e8 //km
 #define h 0.1 //paso del bucle
+
+using namespace std;
 
 void pasaravectores (double vector[], string fichero);
 void aceleracion  (double a[], double masas[], double pos1[], double pos2[]);
 void posicionesyw (double r[], double w[],double v[], double a[]);
 void velocidades (double w[],double a[], double v[]);
+double energia (double pos1[], double pos2[], double vx[], double vy[], double masas[]);
 
-int main ( )
+int main (void)
 {
    
-   int i;
+   int i,j;
    //vectores donde se van a copiar los datos iniciales
    double masas[9], rx[9], vy[9];
    //vectores que se inician en 0
-   double ry[9], vx[9];
+   double ry[9], vx[9], ryanterior[9];
    double ax[9],ay[9];
+   //tiempo durante el cual se va a ejecutar el programa del cual sacamos el numero de iteraciones
    double t, tfinal, iter;
    double wx[9], wy[9];
-   ofstream fichpos, fichenerg, fichper;
+   //ficheros donde se introducen los valores de la posicion, la energia y periodo
+   ofstream fichpos, fichenerg, fichper, fichax, fichay;
+   int cont[9];
+
+//los planetas saldran todos del eje x con una velocidad perpendicular vy por lo que vx e y inicialmente son 0
 
 //pasamos los datos iniciales a vectores para poder trabajar con ellos
+//las masas y las posiciones se encuentran ya reescaldas para no perder precision, ya que trabajamos con valores muy grandes y muy pequeños simultaneamente
 pasaravectores ( masas, "masasescaladas.txt");
 pasaravectores ( rx, "distanciasolyaescala.txt");
 pasaravectores ( vy, "velorb.txt");
 
 
+//vectores que iniciamos en 0
 for(i=0;i<9;i++)
 {
    ry[i]=0.0;
@@ -42,11 +51,14 @@ for(i=0;i<9;i++)
 
 //algoritmo verlet
 
+
 fichpos.open("planets_data.dat");
 fichenerg.open("energia.txt");
 fichper.open("periodo.txt");
+fichax.open("ax.txt");
+fichay.open("ay.txt");
 
-//reescalar velocidades
+//tambien hace falta reescalar las velocidades
 for(i=0;i<9;i++)
 {
    vy[i]=vy[i]/sqrt(G*MasaSol/c);
@@ -61,14 +73,37 @@ cout<<"Introduzca el tiempo durante el cual se va a ejecutar el programa:";
 cin>>tfinal;
 //numero iteraciones
 iter= (int) tfinal/h;
+t=0;
 
-
-for (t=0;t<iter;t++)
+for (i=0;i<=iter;i++)
 {
-
-   for(i=0;i<9;i++)
+  
+//meto en otro vector el valor de la posicion en y para poder calcular despues el periodo 
+   for(j=0;j<9;j++)
    {
-        fichpos<<rx[i]<<", "<<ry[i]<<endl;
+       ryanterior[j]=ry[j];
+   }
+
+   //calculamos la energia y la metemos en su txt
+   fichenerg<<t<<"   "<<energia ( rx, ry, vx,  vy, masas)<<endl;
+
+   for(j=0;j<9;j++)
+   {
+        fichax<<ax[j]<<endl;
+   }
+   fichax<<endl;
+
+   for(j=0;j<9;j++)
+   { 
+        fichay<<ay[j]<<endl;
+   }
+   fichay<<endl;
+
+
+
+   for(j=0;j<9;j++)
+   {
+        fichpos<<rx[j]<<", "<<ry[j]<<endl;
    }
   
    fichpos<<endl;
@@ -77,10 +112,10 @@ for (t=0;t<iter;t++)
    posicionesyw ( ry, wy, vy,  ay);
 
 
-   for(i=0;i<9;i++)
+   for(j=0;j<9;j++)
    {
-      ax[i]=0.0;
-      ay[i]=0.0;
+      ax[j]=0.0;
+      ay[j]=0.0;
 
    }
    
@@ -90,6 +125,20 @@ for (t=0;t<iter;t++)
    
    velocidades ( wx,ax, vx);
    velocidades ( wy,ay, vy);
+
+
+ //periodo
+ for(j=1;j<9;j++)
+   {
+       if(cont[j]==0)
+       {
+         if((ryanterior[j]<0)&&(ry[j]>0))
+         {
+            cont[j]=1;
+            fichper<<j<<"  "<< t*58.1 <<endl; //58.1 es la unidad temporal (reescalamiento)
+         }
+       }
+   }
 
    t =t+h;
 
@@ -126,9 +175,8 @@ void aceleracion  (double a[], double masas[], double pos1[], double pos2[])
 {
 
    int i,j;
-   double suma, norma;
+   double norma;
 
-   suma=0.0;
    for(i=0;i<9;i++)
    {
       for(j=0;j<9;j++)
@@ -138,7 +186,6 @@ void aceleracion  (double a[], double masas[], double pos1[], double pos2[])
             a[i]-=masas[j]*((pos1[i]-pos1[j])/(norma*norma*norma));
          }
          
-      //a[i]=suma;   
    }
 
    return;
@@ -178,8 +225,8 @@ double energia (double pos1[], double pos2[], double vx[], double vy[], double m
   double norma;
   //E es una sumatoria asique la iniciamos a 0
   E=0;
-
-  for (i=0;i<9;i++)
+//emepezamos el bucle en 1 para no meter el sol
+  for (i=1;i<9;i++)
   {
       //cinetica
       E+= 0.5*masas[i]*(vx[i]*vx[i]+vy[i]*vy[i]);
