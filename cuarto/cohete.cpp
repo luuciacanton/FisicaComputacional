@@ -1,15 +1,14 @@
 #include<iostream>
 #include<cmath>
 #include<fstream>
-#define w 2.6617e-6
-#define G 6.67e-11
-#define Mt 5.9736e24
-#define Ml 0.07349e24
-#define dtl 3.844e8
-#define Rt 6.378160e6
-#define Rl 1.7374e6
-#define tmax 250000
-//550000
+#define w 2.6617e-6 //velocidad angular
+#define G 6.67e-11 //constante gravitacion universal
+#define Mt 5.9736e24 //masa tierra
+#define Ml 0.07349e24 //masa luna
+#define dtl 3.844e8  //distancia tierra luna
+#define Rt 6.378160e6 //radio tierra
+#define Rl 1.7374e6 //radio luna
+#define tmax 250000 //tiempo de ejecucion del programa
 
 using namespace std;
 
@@ -22,7 +21,7 @@ int main(void)
     int t;
     double mc, posc, phic, vesc ,theta;//cohete
     double posl, phil;//luna
-    double pr,pphi;
+    double pr,pphi; //momentos
     double v,k[4][4];
     ofstream posiciones,Hamiltoniano;
 
@@ -30,8 +29,8 @@ int main(void)
     mc=18000;
 
     //angulo cohete
-    theta=0.27;//interacciona con la luna y sigue pero para abajo
-    //theta=0.26;//va a la luna y vuelve
+   // theta=0.27;//interacciona con la luna y sigue pero para abajo
+    theta=0.26;//va a la luna y vuelve
    // theta=0.22;//la interaccion es casi nula
     //theta=0.24; //interactua y sigue para arriba con otro angulo
     //theta=0.25; //se desvia aun mas
@@ -66,11 +65,9 @@ int main(void)
 
     for(t=0;t<tmax;t++) 
     {
-
-        //cada 200 pasos escribo las posiciones y el hamiltoniano
+        //he puesto que se guarden cada 200 pq si no tarda mucho en hacerse el programa
         if((t%200)==0)
         {
-
             posiciones<<"0.0, 0.0"<<endl;
             posiciones<<posc*cos(phic)<<", "<<posc*sin(phic)<<endl;
             posiciones<<posl*cos(w*t*1.0)<<", "<<posl*sin(w*t*1.0)<<endl;
@@ -79,14 +76,14 @@ int main(void)
             Hamiltoniano<<(pr*pr/2)+(pphi*pphi/(2*posc*posc))-((G/(dtl*dtl*dtl))*((Mt/posc)+(Ml/(sqrt(1+posc*posc-2*posc*cos(phic-1.0*w*t))))))<<endl;
         }
 
-        //evaluo los k (primera coordenada es el superindice y la segunda indica de que magnitud es, r, phi, p_r o p_phi)
+        //fila: superindice y la segunda indica de que magnitud es, r, phi, p_r o p_phi)
         k[0][0]=pr;
         k[0][1]=pphi/(posc*posc);
         k[0][2]=prpunto(posc, phic, pphi, t);
         k[0][3]=pphipunto(posc, phic, t);
 
-        k[1][0]=(pr+k[0][2]/2.0);
-        k[1][1]=(pphi+k[0][3]/2.0)/(((posc+k[0][0]/2)*(posc+k[0][0]/2)));
+        k[1][0]=(pr+k[0][2]/2);
+        k[1][1]=(pphi+k[0][3]/2)/(((posc+k[0][0]/2)*(posc+k[0][0]/2)));
         k[1][2]=prpunto(posc+ k[0][2]/2, phic + k[0][1]/2, pphi+ k[0][3]/2, t);
         k[1][3]=pphipunto(posc+ k[0][0]/2, phic+k[0][1]/2, t);
 
